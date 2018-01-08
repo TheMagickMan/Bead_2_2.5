@@ -54,6 +54,26 @@ struct Node{
         left = bal;
         right = jobb;
     }
+    void kiir(){
+        if(left!=NULL && right == NULL){
+            left->kiir();
+            cout << "\t" << gyoker << endl;
+        }
+        if(left==NULL && right!=NULL){
+            cout << gyoker << "\t";
+            right->kiir();
+            cout << endl;
+        }
+        if(left!=NULL && right!=NULL){
+            left->kiir();
+            cout << "\t" << gyoker << "\t";
+            right->kiir();
+            cout << endl;
+        }
+        if(left==NULL && right==NULL){
+            cout << gyoker << endl;
+        }
+    }
 };
 
 struct Tree{
@@ -146,12 +166,12 @@ void lengyel (szoveg &pelda){
         pelda.komplett.push_back(elso);
         f >> ws;
     }
-    deque<string> test=pelda.komplett[0].lkod;
+    /*deque<string> test=pelda.komplett[0].lkod;
     cout << pelda.komplett[0].nev << "=";
     while(!test.empty()){
         cout << test.front();
         test.pop_front();
-    }
+    }*/
 }
 
 bool isoperator(string s){
@@ -163,14 +183,23 @@ stack<Node*> expression_tree (deque<string> postfix_code){
     while(!postfix_code.empty()){
         string current = postfix_code.front();
         if(isoperator(current)){
-            Node* bal = uj.top();
-            uj.pop();
+            cout << isoperator(current) << endl;
             Node* jobb = uj.top();
+            jobb->kiir();
             uj.pop();
-            uj.push(new Node(current, bal, jobb));
+            Node* bal = uj.top();
+            cout << "------------" << endl;
+            bal->kiir();
+            uj.pop();
+            cout << "------------" << endl;
+            Node* temp = new Node(current, bal, jobb);
+            uj.push(temp);
+            delete temp;
         }
         else{
-            uj.push(new Node(current));
+            Node* temp = new Node(current);
+            uj.push(temp);
+            delete temp;
         }
         postfix_code.pop_front();
     }
@@ -287,5 +316,6 @@ int main()
     for(Threeadress t : probalkozas){
         cout << t << endl;
     }*/
+    stack<Node*> masolt_valami = valami;
     return 0;
 }
