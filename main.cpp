@@ -81,53 +81,66 @@ void lengyel (szoveg &pelda){
     g.open("proba.txt");
     string aktu;
     string eredet;
-    char szam;
+    string szam;
+    char valami;
+    bool alumni;
+    almuni=1;
     darab elso;
     string vissza;
-    stack<char> verem;
+    stack<string> verem;
     while (f.good()){
         elso.lkod=deque<string>();
         getline(g,eredet,';');
         getline(f,aktu,'=');
         elso.nev=aktu;
-        szam='.';
-        while (szam!=';' ){
-            f >> szam;
-            if (szam=='*' || szam=='/' ){
-                while (!verem.empty() && verem.top()!='(' && verem.top()!='+' && verem.top()!='-'){
-                    vissza=verem.top();
-                    elso.lkod.push_back(vissza);
+        szam=".";
+        while (szam!=";" ){
+            f >> valami;
+            szam=valami;
+            if (szam=="*" || szam=="/" ){
+                while (!verem.empty() && verem.top()!="(" && verem.top()!="+" && verem.top()!="-"){                 
+                    elso.lkod.push_back(szam);
                     verem.pop();
                 }
+                alumn=0;
                 verem.push(szam);
             }
             else{
-                if (szam=='+' || szam=='-' ){
-                    while (!verem.empty() && verem.top()!='(' ){
-                        vissza=verem.top();
-                        elso.lkod.push_back(vissza);
+                if (szam=="+" || szam=="-" ){
+                    while (!verem.empty() && verem.top()!="(" ){
+                        elso.lkod.push_back(szam);
                         verem.pop();
                     }
+                    alumn=0;
                     verem.push(szam);
                 }
                 else{
-                    if (szam==')'){
-                        while (verem.top()!='('){
-                            vissza=verem.top();
-                            elso.lkod.push_back(vissza);
+                    if (szam==")"){
+                        while (verem.top()!="("){                            
+                            elso.lkod.push_back(szam);
                             verem.pop();
                         }
+                        alumn=0;
                         verem.pop();
                     }
                     else{
-                        if (szam=='('){
-                            verem.push('(');
+                        if (szam=="("){
+                            verem.push("(");
+                            alumn=0;
                         }
                         else{
-                            if (szam==';'){}
+                            if (szam==";"){alumn=0;}
                             else{
-                                vissza=szam;
-                                elso.lkod.push_back(vissza);
+                                if (!alumni)
+                                {
+                                    cout << vissza;
+                                    elso.lkod.push_back(vissza);
+                                    vissza="";
+                                }
+                                else
+                                {
+                                    vissza+=szam;
+                                }
                             }
                         }
                     }
@@ -135,9 +148,8 @@ void lengyel (szoveg &pelda){
             }
 
   }
-        while (!verem.empty()){
-            vissza=verem.top();
-            elso.lkod.push_back(vissza);
+        while (!verem.empty()){            
+            elso.lkod.push_back(verem.top());
             verem.pop();
         }
         pelda.komplett.push_back(elso);
