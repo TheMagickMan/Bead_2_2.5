@@ -54,34 +54,11 @@ struct Node{
         left = bal;
         right = jobb;
     }
-    void kiir(){
-        if(left!=NULL && right == NULL){
-            left->kiir();
-            cout << "\t" << gyoker << endl;
-        }
-        if(left==NULL && right!=NULL){
-            cout << gyoker << "\t";
-            right->kiir();
-            cout << endl;
-        }
-        if(left!=NULL && right!=NULL){
-            left->kiir();
-            cout << "\t" << gyoker << "\t";
-            right->kiir();
-            cout << endl;
-        }
-        if(left==NULL && right==NULL){
-            cout << gyoker << endl;
-        }
-    }
 };
 
 struct Tree{
     string nev;
-    void ujlevel(string gyoker, Node *level){
-
-    }
-    Node *root;
+    stack<Node*> magaafa;
 };
 
 ostream& operator << (ostream& kimenet, Threeadress& kiirando){
@@ -183,15 +160,10 @@ stack<Node*> expression_tree (deque<string> postfix_code){
     while(!postfix_code.empty()){
         string current = postfix_code.front();
         if(isoperator(current)){
-            cout << isoperator(current) << endl;
             Node* jobb = uj.top();
-            jobb->kiir();
             uj.pop();
             Node* bal = uj.top();
-            cout << "------------" << endl;
-            bal->kiir();
             uj.pop();
-            cout << "------------" << endl;
             Node* temp = new Node(current, bal, jobb);
             uj.push(temp);
             delete temp;
@@ -204,6 +176,18 @@ stack<Node*> expression_tree (deque<string> postfix_code){
         postfix_code.pop_front();
     }
     return uj;
+}
+
+vector<Tree> sorok_fai(szoveg pelda){
+    vector<Tree> retval;
+    vector<darab> current = pelda.komplett;
+    for(darab d : current){
+        Tree temp;
+        temp.nev = d.nev;
+        temp.magaafa = expression_tree(d.lkod);
+        retval.push_back(temp);
+    }
+    return retval;
 }
 
 vector<Threeadress> felbont(szoveg pelda){
@@ -311,11 +295,6 @@ int main()
 {
     szoveg pelda;
     lengyel(pelda);
-    stack<Node*> valami = expression_tree(pelda.komplett[0].lkod);
-    /*vector<Threeadress> probalkozas = felbont(pelda);
-    for(Threeadress t : probalkozas){
-        cout << t << endl;
-    }*/
-    stack<Node*> masolt_valami = valami;
+    vector<Tree> valami = sorok_fai(pelda);
     return 0;
 }
