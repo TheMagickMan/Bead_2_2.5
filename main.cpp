@@ -16,55 +16,105 @@
 
 using namespace std;
 
-struct Node {
+bool isoperator(string s)
+{
+    return(s=="*" || s=="/" || s=="+" || s=="-");
+}
+
+struct Node
+{
     string gyoker;
     Node* left;
     Node* right;
     Node * parent;
-    Node(string ujgyok) {
+    Node(string ujgyok)
+    {
         gyoker = ujgyok;
         left = NULL;
         right = NULL;
     }
-    Node(string ujgyok, Node* szulo) {
+    Node(string ujgyok, Node* szulo)
+    {
         gyoker = ujgyok;
         parent = szulo;
     }
 };
 
 
-struct darab {
+struct darab
+{
     string nev;
     deque<string> lkod;
     //ha vmi kell meg ide irjatok batran;
 };
 
 
-struct linkedNode {
+struct linkedNode
+{
     Node *tartalom;
     linkedNode* kovi;
 };
 
-struct szoveg { //szerintem a structban inkább egy-egy aritmetikai utasításnak kéne csak lenine, nem az egész kódnak
+
+void inorder_bejar_kiir(Node* node, int i) //erre kéne rájönni
+{
+    if(node == NULL)
+    {
+        return;
+    }
+    inorder_bejar_kiir(node->right,i);
+    if(!isoperator(node->gyoker)){
+        node->gyoker = "reg["+to_string(i)+"]="+node->gyoker;
+        cout << node->gyoker << endl;
+        i++;
+        //inorder_bejar_kiir(node->parent, i);
+    }
+    else{
+        string temp = "reg["+to_string(i)+"]="+node->left->gyoker;
+        temp+=node->gyoker;
+        node->gyoker+=temp+node->right->gyoker;
+        cout << node->gyoker << endl;
+        i++;
+    }
+    inorder_bejar_kiir(node->left, i);
+}
+
+
+struct szoveg   //szerintem a structban inkább egy-egy aritmetikai utasításnak kéne csak lenine, nem az egész kódnak
+{
     string fnev;
     vector<darab> komplett;
     vector<pair<string, Node*> > fak;
     string gkod;
+    void inorder_bejar_three()
+    {
+        int i = 0;
+        for(pair<string, Node*> fa : fak)
+        {
+            Node* t = fa.second;
+            inorder_bejar_kiir(t,i);
+        }
+    }
 };
 
 
-struct Threeadress {
+
+
+struct Threeadress
+{
     string baloldal;
     vector<string> jobboldal;
     string operand;
-    Threeadress() {
+    Threeadress()
+    {
         baloldal.clear();
         operand.clear();
     }
 };
 
 
-bool syntaxerror(szoveg &pelda){
+bool syntaxerror(szoveg &pelda)
+{
     ifstream f;
     int i = 0;
     f.open("proba.txt");
@@ -74,64 +124,53 @@ bool syntaxerror(szoveg &pelda){
     bool baj;
     baj=0;
     while (f.good())
+    {
+        while (aktu!='=')
         {
-            while (aktu!='=')
+            f >> aktu;
+            if (aktu=='=') break;
+            if (!isupper(aktu))
             {
-                f >> aktu;
-                if (aktu=='=') break;
-                if (!isupper(aktu))
-                {
-                    cerr << "Error a kifejezesben, rossz karakter:" << aktu << endl;
+                cerr << "Error a kifejezesben, rossz karakter:" << aktu << endl;
 
-                    baj=1;
-                }
-
+                baj=1;
             }
-            while (aktu!=';')
-            {
-                    f >> aktu;
-                    if (aktu==';') break;
-                    if (isupper(aktu))
-                    {
-                        cerr << "Error az aritmetikai kodban, rossz karakter:" << aktu << endl;
-                    baj=1;
-                    }
 
-            }
-            f >> ws;
         }
-return(baj);
+        while (aktu!=';')
+        {
+            f >> aktu;
+            if (aktu==';') break;
+            if (isupper(aktu))
+            {
+                cerr << "Error az aritmetikai kodban, rossz karakter:" << aktu << endl;
+                baj=1;
+            }
+
+        }
+        f >> ws;
+    }
+    return(baj);
 }
 //Prajczer Péter látta (15:36)
 
 
-
-void inorder_bejar_kiir(Node* node) {
-    if(node == NULL) {
-        return;
-    }
-    inorder_bejar_kiir(node->left);
-    cout << node->gyoker;
-    inorder_bejar_kiir(node->right);
-
-}
-
-void stackberak(linkedNode **ref_to_top, Node *uj) {
+void stackberak(linkedNode **ref_to_top, Node *uj)
+{
     linkedNode* newNode;
     newNode->tartalom = uj;
     newNode->kovi = *ref_to_top;
 }
 
-bool isempty(linkedNode *top) {
+bool isempty(linkedNode *top)
+{
     if(top==NULL) return 1;
     else return 0;
 }
 
-bool isoperator(string s) {
-    return(s=="*" || s=="/" || s=="+" || s=="-");
-}
 
-Node* stackbolkivesz(linkedNode** ref_to_top){
+Node* stackbolkivesz(linkedNode** ref_to_top)
+{
     Node* eredmeny;
     linkedNode *top;
     top = *ref_to_top;
@@ -141,18 +180,23 @@ Node* stackbolkivesz(linkedNode** ref_to_top){
     return eredmeny;
 }
 
-vector<Threeadress> inorder_threea_nonrec(Node* node) {
+vector<Threeadress> inorder_threea_nonrec(Node* node)
+{
     vector<Threeadress> vissza;
     Node *current = node;
     linkedNode *sztekk = NULL;
     bool vege = 0;
-    while(!vege){
-        if(current != NULL){
+    while(!vege)
+    {
+        if(current != NULL)
+        {
             stackberak(&sztekk, current);
             current = current->left;
         }
-        else{
-            if(!isempty(sztekk)){
+        else
+        {
+            if(!isempty(sztekk))
+            {
                 current = stackbolkivesz(&sztekk);
             }
         }
@@ -160,16 +204,19 @@ vector<Threeadress> inorder_threea_nonrec(Node* node) {
 
 }
 
-ostream& operator << (ostream& kimenet, Threeadress& kiirando) {
+ostream& operator << (ostream& kimenet, Threeadress& kiirando)
+{
     kimenet << kiirando.baloldal << "=";
-    for(int i = 0; i < kiirando.jobboldal.size(); i++) {
+    for(int i = 0; i < kiirando.jobboldal.size(); i++)
+    {
         kimenet << kiirando.jobboldal[i];
         if(i == 0) kimenet << kiirando.operand;
     }
 }
 
 
-void lengyel (szoveg &pelda) {
+void lengyel (szoveg &pelda)
+{
     fstream f,g,h;
     f.open("proba.txt");
     g.open("proba.txt");
@@ -185,7 +232,8 @@ void lengyel (szoveg &pelda) {
     string vissza;
     vissza="";
     stack<string> verem;
-    while (f.good()) {
+    while (f.good())
+    {
         elso.lkod=deque<string>();
         getline(g,eredet,';');
         cout << eredet << endl;
@@ -196,54 +244,77 @@ void lengyel (szoveg &pelda) {
         h >> kuka;
         vissza=kuka;
         szam=".";
-        while (szam!=";" ) {
-            while (korr >1&& f.good()) {
+        while (szam!=";" )
+        {
+            while (korr >1&& f.good())
+            {
                 f >> kuka;
                 korr--;
             }
             f >> aktu2;
             szam=aktu2;
-            if (szam=="*" || szam=="/" ) {
-                while (!verem.empty() && verem.top()!="(" && verem.top()!="+" && verem.top()!="-") {
+            if (szam=="*" || szam=="/" )
+            {
+                while (!verem.empty() && verem.top()!="(" && verem.top()!="+" && verem.top()!="-")
+                {
                     elso.lkod.push_back(verem.top());
                     verem.pop();
                 }
                 verem.push(szam);
-            } else {
-                if (szam=="+" || szam=="-" ) {
-                    while (!verem.empty() && verem.top()!="(" ) {
+            }
+            else
+            {
+                if (szam=="+" || szam=="-" )
+                {
+                    while (!verem.empty() && verem.top()!="(" )
+                    {
                         elso.lkod.push_back(verem.top());
                         verem.pop();
                     }
                     verem.push(szam);
-                } else {
+                }
+                else
+                {
 
-                    if (szam==")") {
-                        while (verem.top()!="(") {
+                    if (szam==")")
+                    {
+                        while (verem.top()!="(")
+                        {
                             elso.lkod.push_back(verem.top());
                             verem.pop();
                         }
                         h >> kuka;
                         verem.pop();
 
-                    } else {
-                        if (szam=="(") {
+                    }
+                    else
+                    {
+                        if (szam=="(")
+                        {
                             verem.push("(");
                             h >> kuka;
-                        } else {
-                            if (szam==";") {
+                        }
+                        else
+                        {
+                            if (szam==";")
+                            {
                                 ;
-                            } else {
-                                if (korr==1) {
+                            }
+                            else
+                            {
+                                if (korr==1)
+                                {
                                     h >> kuka;
                                     korr--;
                                 }
                                 vissza=szam;
-                                if (h.good()) {
+                                if (h.good())
+                                {
                                     h >> aktu2;
                                     korr++;
                                 }
-                                while (isalnum(aktu2) && h.good()) {
+                                while (isalnum(aktu2) && h.good())
+                                {
                                     vissza+=aktu2;
                                     h >> aktu2;
                                     korr++;
@@ -256,7 +327,8 @@ void lengyel (szoveg &pelda) {
                 }
             }
         }
-        while (!verem.empty()) {
+        while (!verem.empty())
+        {
             elso.lkod.push_back(verem.top());
             verem.pop();
         }
@@ -274,17 +346,23 @@ void lengyel (szoveg &pelda) {
 
 
 
-void make_tree(szoveg& pelda) {
+void make_tree(szoveg& pelda)
+{
     Node *t, *t1, *t2;
-    for(darab d : pelda.komplett) {
+    for(darab d : pelda.komplett)
+    {
         stack<Node*> sztekk;
         deque<string> current = d.lkod;
-        while(!current.empty()) {
-            if(!isoperator(current.front())) {
+        while(!current.empty())
+        {
+            if(!isoperator(current.front()))
+            {
                 t = new Node(current.front());
                 sztekk.push(t);
                 current.pop_front();
-            } else {
+            }
+            else
+            {
                 t = new Node(current.front());
                 t1 = sztekk.top();
                 sztekk.pop();
@@ -304,10 +382,11 @@ void make_tree(szoveg& pelda) {
 }
 
 
-int main() {
+int main()
+{
     szoveg pelda;
     lengyel(pelda);
     make_tree(pelda);
-    inorder_bejar_kiir(pelda.fak[0].second);
+    inorder_bejar_kiir(pelda.fak[0].second, 0);
     return 0;
 }
